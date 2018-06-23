@@ -1,0 +1,92 @@
+#+TITLE: Emacs configuration
+
+* Initialization
+** Path
+#+BEGIN_SRC emacs-lisp
+(setenv "PATH" (concat "/Library/TeX/texbin" ":" (getenv "PATH"))) ; LaTeX
+#+END_SRC
+
+** Package.el
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  ;; (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  (add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+(package-initialize)
+#+END_SRC
+
+** use-package
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/use-package/")
+(require 'use-package)
+#+END_SRC
+
+** Customized behaviour
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p) ; Yes/no prompt shorter
+(setq mac-right-option-modifier nil) ; Free up right alt button for special characters
+#+END_SRC
+
+* Theme & Visuals
+** Powerline
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/powerline/")
+(require 'powerline)
+(powerline-default-theme)
+#+END_SRC
+
+** Base16
+#+BEGIN_SRC emacs-lisp
+(use-package base16-theme
+  :ensure t
+  :config
+  (load-theme 'base16-material t))
+#+END_SRC
+
+** Miscellaneous
+#+BEGIN_SRC emacs-lisp
+(setq ns-use-srgb-colorspace nil)
+(tool-bar-mode -1) ; Remove toolbar
+
+;;; Nice size for the default window
+(defun get-default-height ()
+       (/ (- (display-pixel-height) 140)
+          (frame-char-height)))
+
+(add-to-list 'default-frame-alist '(width . 140))
+(add-to-list 'default-frame-alist (cons 'height (get-default-height)))
+
+;;; Font
+(custom-set-faces
+ '(default ((t (:inherit nil :stipple nil :background "#1d1f21" :foreground "#c5c8c6" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 120 :width normal :foundry "nil" :family "FuraCode Nerd Font")))))
+#+END_SRC
+
+* Plugins
+** Helm
+#+BEGIN_SRC emacs-lisp
+(use-package helm
+  :ensure t
+  :bind (("M-x" . helm-M-x)))
+#+END_SRC
+
+** Dashboard
+#+BEGIN_SRC emacs-lisp
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+#+END_SRC
+
+** Org-mode setup
+#+BEGIN_SRC emacs-lisp
+;;; UTF-8 bullets
+(add-to-list 'load-path "~/.emacs.d/org-bullets")
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+END_SRC
